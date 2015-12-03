@@ -96,76 +96,73 @@ class Tag extends \yii\db\ActiveRecord
     
     
 
-    public function updateFrequency($oldTags, $newTags)
-    {	
-	    	$oldTags=self::string2array($oldTags);
-
-	    	$newTags=self::string2array($newTags);
-	    	
-	    	self::addTags(array_values(array_diff($newTags,$oldTags)));
-	    	self::removeTags(array_values(array_diff($oldTags,$newTags)));
-    }
-    
-    public function addTags($tags)
+    public static function updateFrequency($oldTags, $newTags)
     {
-	    	foreach($tags as $name)
-	    	{
-	    		$aTag = Tag::find()
-	    		->where(['name' => $name])
-	    		->one();
-	    		
-	    		$aTagCount = Tag::find()
-	    		->where(['name' => $name])
-	    		->count();
-	    		
-	    		
-	    		if(!$aTagCount)
-	    		{
-	    			$tag=new Tag;
-	    			$tag->name=$name;
-	    			$tag->frequency=1;
-	    			$tag->save();
-	    		}
-	    		else 
-	    		{
-	    			$aTag->frequency+=1;
-	    			$aTag->save();
-	    		}
-	    	}
+		if( !empty($oldTags) || !empty($newTags) ) {
+			$oldTags = self::string2array($oldTags);
+			$newTags = self::string2array($newTags);
+
+			self::addTags(array_values(array_diff($newTags, $oldTags)));
+			self::removeTags(array_values(array_diff($oldTags, $newTags)));
+		}
     }
     
-    public function removeTags($tags)
+    public static function addTags($tags)
     {
-	    	if(empty($tags)) return;
+		if( empty($tags) ) return;
 
-	    	foreach($tags as $name)
-	    	{
-	    		$aTag = Tag::find()
-	    		->where(['name' => $name])
-	    		->one();
-	    		
-	    		$aTagCount = Tag::find()
-	    		->where(['name' => $name])
-	    		->count();
-	    		 
-	    		if($aTagCount)
-		    		{
-			    		if($aTagCount && $aTag->frequency<=1)
-			    		{
-			    			$aTag->delete();
-			    		}
-			    		else
-			    		{
-			    			$aTag->frequency-=1;
-			    			$aTag->save();
-			    		}
-		    		}
-	    		 
-	    	}
+		foreach($tags as $name)
+		{
+			$aTag = Tag::find()
+			->where(['name' => $name])
+			->one();
 
+			$aTagCount = Tag::find()
+			->where(['name' => $name])
+			->count();
+
+
+			if(!$aTagCount)
+			{
+				$tag=new Tag;
+				$tag->name=$name;
+				$tag->frequency=1;
+				$tag->save();
+			}
+			else
+			{
+				$aTag->frequency+=1;
+				$aTag->save();
+			}
+		}
     }
     
-    
-    
-    
+    public static function removeTags($tags)
+    {
+		if(empty($tags)) return;
+
+		foreach($tags as $name)
+		{
+			$aTag = Tag::find()
+			->where(['name' => $name])
+			->one();
+
+			$aTagCount = Tag::find()
+			->where(['name' => $name])
+			->count();
+
+			if($aTagCount)
+			{
+				if($aTagCount && $aTag->frequency<=1)
+				{
+					$aTag->delete();
+				}
+				else
+				{
+					$aTag->frequency-=1;
+					$aTag->save();
+				}
+			}
+		}
+    }
 }
